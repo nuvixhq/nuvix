@@ -2,39 +2,229 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Geri Dön</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📝 Not Defteri | Nuvixhq</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
   <style>
-    body {
-      margin: 0;
-      padding: 0;
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f2f2f2;
     }
 
-    .back-button {
+    body, html {
+      height: 100%;
+      background-color: #f5f7fa;
+      color: #333;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    header {
+      background: linear-gradient(to right, #007acc, #00bcd4);
+      padding: 25px 20px;
+      text-align: center;
+      color: white;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+      text-shadow: 2px 2px #004a99;
+    }
+
+    header p {
+      font-size: 1rem;
+      font-style: italic;
+      color: #e0f7fa;
+    }
+
+    .back-btn {
       position: absolute;
       top: 20px;
       left: 20px;
       background-color: #007acc;
       color: white;
       padding: 10px 15px;
-      border: none;
       border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
       text-decoration: none;
+      font-weight: bold;
       transition: background-color 0.3s;
+      z-index: 10;
     }
 
-    .back-button:hover {
+    .back-btn:hover {
       background-color: #005fbb;
+    }
+
+    main {
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      text-align: center;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      font-size: 16px;
+      resize: vertical;
+      margin-bottom: 10px;
+      background-color: #ffffff;
+      color: #000000;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    #addBtn {
+      margin-top: 5px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    li {
+      background-color: #ffffff;
+      color: #000000;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .deleteBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* Dark Mode */
+    body.dark {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    body.dark header {
+      background: linear-gradient(to right, #222, #444);
+      color: #fff;
+    }
+
+    body.dark .back-btn {
+      background-color: #444;
+      color: #fff;
+    }
+
+    body.dark .back-btn:hover {
+      background-color: #222;
+    }
+
+    body.dark main {
+      background-color: #1e1e1e;
+      color: #ddd;
+    }
+
+    body.dark textarea {
+      background-color: #2a2a2a;
+      color: #eee;
+      border: 1px solid #555;
+    }
+
+    body.dark #addBtn {
+      background-color: #444;
+      color: #eee;
+    }
+
+    body.dark li {
+      background-color: #2a2a2a;
+      color: #eee;
+    }
+
+    body.dark .deleteBtn {
+      background-color: #bb2d3b;
     }
   </style>
 </head>
 <body>
 
-  <a href="index.html" class="back-button">⬅ Geri Dön</a>
+  <a href="index.html" class="back-btn">← Geri Dön</a>
 
+  <header>
+    <h1>📝 Not Defteri</h1>
+    <p>Düşüncelerini, fikirlerini ve planlarını buraya not al</p>
+  </header>
+
+  <main>
+    <textarea id="noteInput" placeholder="Yeni notunuzu yazın..."></textarea><br>
+    <button id="addBtn">Not Ekle</button>
+    <ul id="noteList"></ul>
+  </main>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      if(localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark');
+      }
+    });
+
+    const noteInput = document.getElementById("noteInput");
+    const addBtn = document.getElementById("addBtn");
+    const noteList = document.getElementById("noteList");
+
+    let notes = JSON.parse(localStorage.getItem("notes")) || [];
+
+    function renderNotes() {
+      noteList.innerHTML = "";
+      notes.forEach((note, index) => {
+        const li = document.createElement("li");
+        li.textContent = note;
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Sil";
+        delBtn.className = "deleteBtn";
+        delBtn.onclick = () => {
+          notes.splice(index, 1);
+          saveNotes();
+        };
+        li.appendChild(delBtn);
+        noteList.appendChild(li);
+      });
+    }
+
+    function saveNotes() {
+      localStorage.setItem("notes", JSON.stringify(notes));
+      renderNotes();
+    }
+
+    addBtn.addEventListener("click", () => {
+      const text = noteInput.value.trim();
+      if (text) {
+        notes.push(text);
+        noteInput.value = "";
+        saveNotes();
+      }
+    });
+
+    renderNotes();
+  </script>
 </body>
 </html>
