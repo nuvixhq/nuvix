@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍅 Pomodoro Zamanlayıcı | Nuvixhq</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(to right, #007acc, #00bcd4);
+      padding: 25px 20px;
+      text-align: center;
+      color: white;
+    }
+
+    header h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      margin-bottom: 5px;
+      text-shadow: 2px 2px #004a99;
+    }
+
+    header p {
+      font-size: 1rem;
+      font-style: italic;
+      color: #e0f7fa;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #007acc;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .back-btn:hover {
+      background-color: #005fbb;
+    }
+
+    main {
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      text-align: center;
+    }
+
+    h2 {
+      color: #007acc;
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    input[type="number"] {
+      padding: 8px;
+      width: 60px;
+      margin: 0 10px 20px 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    #timerDisplay {
+      font-size: 3rem;
+      margin: 25px 0;
+      color: #007acc;
+      font-weight: bold;
+    }
+
+    button {
+      background-color: #007acc;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 5px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #005fbb;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-btn">← Geri Dön</a>
+
+  <header>
+    <h1>🍅 Pomodoro Zamanlayıcı</h1>
+    <p>Verimli çalışmak için sade ve sesli zamanlayıcı</p>
+  </header>
+
+  <main>
+    <div>
+      <label for="workMinutes">Çalışma Süresi (dk):</label>
+      <input type="number" id="workMinutes" value="25" min="1" />
+    </div>
+    <div>
+      <label for="breakMinutes">Mola Süresi (dk):</label>
+      <input type="number" id="breakMinutes" value="5" min="1" />
+    </div>
+    <div>
+      <label for="cycles">Döngü Sayısı:</label>
+      <input type="number" id="cycles" value="4" min="1" />
+    </div>
+
+    <div id="timerDisplay">25:00</div>
+
+    <div>
+      <button onclick="startPomodoro()">▶ Başlat</button>
+      <button onclick="pausePomodoro()">⏸ Durdur</button>
+      <button onclick="resetPomodoro()">🔄 Sıfırla</button>
+    </div>
+
+    <audio id="alarm">
+      <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg" />
+      Tarayıcınız bu sesi desteklemiyor.
+    </audio>
+  </main>
+
+  <script>
+    let timer;
+    let isRunning = false;
+    let isWork = true;
+    let timeLeft = 0;
+    let currentCycle = 0;
+
+    const alarm = document.getElementById("alarm");
+    const timerDisplay = document.getElementById("timerDisplay");
+
+    function updateDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function startPomodoro() {
+      if (isRunning) return;
+
+      const workMinutes = parseInt(document.getElementById("workMinutes").value);
+      const breakMinutes = parseInt(document.getElementById("breakMinutes").value);
+      const totalCycles = parseInt(document.getElementById("cycles").value);
+
+      if (timeLeft <= 0) {
+        timeLeft = (isWork ? workMinutes : breakMinutes) * 60;
+      }
+
+      isRunning = true;
+      timer = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateDisplay();
+        } else {
+          alarm.play();
+          clearInterval(timer);
+          isRunning = false;
+          isWork = !isWork;
+
+          if (!isWork) {
+            currentCycle++;
+          }
+
+          if (currentCycle < totalCycles) {
+            timeLeft = (isWork ? workMinutes : breakMinutes) * 60;
+            startPomodoro();
+          } else {
+            alert("🎉 Tüm Pomodoro döngüleri tamamlandı!");
+            resetPomodoro();
+          }
+        }
+      }, 1000);
+    }
+
+    function pausePomodoro() {
+      clearInterval(timer);
+      isRunning = false;
+    }
+
+    function resetPomodoro() {
+      clearInterval(timer);
+      isRunning = false;
+      isWork = true;
+      currentCycle = 0;
+      timeLeft = parseInt(document.getElementById("workMinutes").value) * 60;
+      updateDisplay();
+    }
+
+    resetPomodoro();
+  </script>
+
+</body>
+</html>
